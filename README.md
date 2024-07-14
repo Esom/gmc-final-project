@@ -18,7 +18,7 @@ This is a simple web application that allows users to input text, submit it, and
 1. Clone the repository:
     ```bash
     git clone https://github.com/Esom/gmc-final-project.git
-    cd gmc-cs-project/app
+    cd app
     ```
 
 2. Install the dependencies:
