@@ -63,6 +63,20 @@
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       max-width: 400px;
       word-wrap: break-word;
+      display: none;
+    }
+    .loader {
+      border: 16px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 16px solid #3498db;
+      width: 120px;
+      height: 120px;
+      animation: spin 2s linear infinite;
+      display: none;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
@@ -78,12 +92,32 @@
     <button type="button" id="decryptBtn">Decrypt</button>
   </form>
 
+
   <h2>Output:</h2>
+  <div class="loader" id="loader"></div>
   <p id="outputText"></p>
 
   <script>
+    const loader = document.getElementById('loader');
+    const outputText = document.getElementById('outputText');
+
+    function showLoader() {
+      loader.style.display = 'block';
+      outputText.style.display = 'none';
+    }
+
+    function hideLoader() {
+      loader.style.display = 'none';
+    }
+
+    function showOutput(text) {
+      outputText.style.display = 'block';
+      outputText.innerText = text;
+    }
+
     document.getElementById('encryptBtn').addEventListener('click', function() {
       const text = document.getElementById('text').value;
+      showLoader();
 
       fetch('/encrypt', {
         method: 'POST',
@@ -94,13 +128,18 @@
       })
       .then(response => response.json())
       .then(data => {
-        document.getElementById('outputText').innerText = `Encrypted: ${data.encryptedText}`;
+        hideLoader();
+        showOutput(`Encrypted: ${data.encryptedText}`);
       })
-      .catch(error => console.error('Error:', error));
+      .catch(error => {
+        hideLoader();
+        console.error('Error:', error);
+      });
     });
 
     document.getElementById('decryptBtn').addEventListener('click', function() {
       const encryptedText = document.getElementById('encrypted').value;
+      showLoader();
 
       fetch('/decrypt', {
         method: 'POST',
@@ -111,9 +150,13 @@
       })
       .then(response => response.json())
       .then(data => {
-        document.getElementById('outputText').innerText = `Decrypted: ${data.decryptedText}`;
+        hideLoader();
+        showOutput(`Decrypted: ${data.decryptedText}`);
       })
-      .catch(error => console.error('Error:', error));
+      .catch(error => {
+        hideLoader();
+        console.error('Error:', error);
+      });
     });
   </script>
 </body>
