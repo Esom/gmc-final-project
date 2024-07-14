@@ -1,11 +1,11 @@
 # Text Encryption App
 
-This is a simple web application that allows users to input text, submit it, and see the encrypted value using the AES-256-CBC algorithm.
+This is a simple web application that allows users to input text, submit it, and see the encrypted/decrypted value using the AES-256-CBC algorithm.
 
 ## Features
 
-- Encrypt text using AES-256-CBC.
-- Display the encrypted text on the web page.
+- Encrypt/Decrypt text using AES-256-CBC.
+- Display the encrypted/decrypted text on the web page.
 - Responsive design with basic styling.
 
 ## Prerequisites
