@@ -38,5 +38,7 @@ This is a simple web application that allows users to input text, submit it, and
 
 4. Enter the encrypted text you want to decrypt in the input field and click the "Decrypt" button. The decrypted text will be displayed below.
 
-## Project Structure
+## Public Url
+
+https://gmc-final-project.onrender.com/
 
