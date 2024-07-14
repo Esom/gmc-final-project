@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Text Encryption</title>
+  <title>Text Encryption and Decryption</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -24,6 +24,9 @@
       padding: 10%;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      width: 80%;
+      max-width: 500px;
     }
     label {
       font-size: 14px;
@@ -44,6 +47,7 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
+      margin-right: 10px;
     }
     button:hover {
       background-color: #45a049;
@@ -63,18 +67,22 @@
   </style>
 </head>
 <body>
-  <h1>Text Encryption using AES-256-CBC</h1>
-  <form id="encryptionForm">
+  <h1>Text Encryption and Decryption using AES-256-CBC</h1>
+
+  <form id="cryptoForm">
     <label for="text">Enter text to encrypt:</label>
-    <input type="text" id="text" name="text" required>
-    <button type="submit">Encrypt</button>
+    <input type="text" id="text" name="text">
+    <label for="encrypted">Enter text to decrypt:</label>
+    <input type="text" id="encrypted" name="encrypted">
+    <button type="button" id="encryptBtn">Encrypt</button>
+    <button type="button" id="decryptBtn">Decrypt</button>
   </form>
-  <h2>Encrypted Text:</h2>
-  <p id="encryptedText"></p>
+
+  <h2>Output:</h2>
+  <p id="outputText"></p>
 
   <script>
-    document.getElementById('encryptionForm').addEventListener('submit', function(event) {
-      event.preventDefault();
+    document.getElementById('encryptBtn').addEventListener('click', function() {
       const text = document.getElementById('text').value;
 
       fetch('/encrypt', {
@@ -86,7 +94,24 @@
       })
       .then(response => response.json())
       .then(data => {
-        document.getElementById('encryptedText').innerText = data.encryptedText;
+        document.getElementById('outputText').innerText = `Encrypted: ${data.encryptedText}`;
+      })
+      .catch(error => console.error('Error:', error));
+    });
+
+    document.getElementById('decryptBtn').addEventListener('click', function() {
+      const encryptedText = document.getElementById('encrypted').value;
+
+      fetch('/decrypt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `encrypted=${encryptedText}`
+      })
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('outputText').innerText = `Decrypted: ${data.decryptedText}`;
       })
       .catch(error => console.error('Error:', error));
     });
