@@ -1,8 +1,25 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const NodeRSA = require('node-rsa');
 
 const app = express();
+
+// Helmet
+app.use(helmet());
+app.use(helmet.xssFilter());
+app.use(helmet.frameguard());
+
+// Rate Limiter
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+
+app.use(limiter);
+
 const port = 3000;
 
 const algorithm = 'aes-256-cbc';
@@ -43,6 +60,17 @@ app.post('/decrypt', (req, res) => {
   const encryptedText = req.body.encrypted;
   const decryptedText = decrypt(encryptedText);
   res.send({ decryptedText });
+});
+
+// Route to generate RSA key pair
+app.post('/generate-key-pair', (req, res) => {
+  const keyLength = parseInt(req.body.keyLength, 10);
+  const key = new NodeRSA({ b: keyLength });
+
+  const privateKey = key.exportKey('private');
+  const publicKey = key.exportKey('public');
+
+  res.send({ privateKey, publicKey });
 });
 
 app.listen(port, () => {
