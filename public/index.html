@@ -3,8 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Text Encryption and Decryption</title>
+  <title>Text Encryption and RSA Key Generator</title>
   <style>
+    select#keyLength {
+      height: 34px;
+      width: 20%;
+    }
     body {
       font-family: Arial, sans-serif;
       background-color: #f4f4f4;
@@ -13,20 +17,26 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 100vh;
+      justify-content: flex-start;
+      min-height: 100vh;
     }
-    h1 {
+    h1, h2 {
       color: #333;
+      text-align: center;
+      margin-bottom: 20px;
     }
-    form {
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .form-container, .rsa-container {
       background: #fff;
-      padding: 10%;
+      padding: 20px;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       margin-bottom: 20px;
-      width: 80%;
-      max-width: 500px;
     }
     label {
       font-size: 14px;
@@ -48,31 +58,38 @@
       border-radius: 4px;
       cursor: pointer;
       margin-right: 10px;
+      transition: background-color 0.3s ease;
     }
     button:hover {
       background-color: #45a049;
     }
-    h2 {
-      margin-top: 20px;
-      color: #333;
-    }
-    p {
+    .output-container, .key-pair-container {
       background: #fff;
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      max-width: 400px;
+      max-width: 100%;
       word-wrap: break-word;
-      display: none;
+      margin-top: 20px;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 10px;
+      resize: none;
     }
     .loader {
-      border: 16px solid #f3f3f3;
+      border: 8px solid #f3f3f3;
       border-radius: 50%;
-      border-top: 16px solid #3498db;
-      width: 120px;
-      height: 120px;
+      border-top: 8px solid #3498db;
+      width: 60px;
+      height: 60px;
       animation: spin 2s linear infinite;
       display: none;
+      margin: 20px auto;
     }
     @keyframes spin {
       0% { transform: rotate(0deg); }
@@ -81,83 +98,43 @@
   </style>
 </head>
 <body>
-  <h1>Text Encryption and Decryption using AES-256-CBC</h1>
+  <div class="container">
+    <h1>Text Encryption and Decryption using AES-256-CBC</h1>
+    <div class="form-container">
+      <form id="cryptoForm">
+        <label for="text">Enter text to encrypt:</label>
+        <input type="text" id="text" name="text">
+        <label for="encrypted">Enter text to decrypt:</label>
+        <input type="text" id="encrypted" name="encrypted">
+        <button type="button" id="encryptBtn">Encrypt</button>
+        <button type="button" id="decryptBtn">Decrypt</button>
+      </form>
+    </div>
 
-  <form id="cryptoForm">
-    <label for="text">Enter text to encrypt:</label>
-    <input type="text" id="text" name="text">
-    <label for="encrypted">Enter text to decrypt:</label>
-    <input type="text" id="encrypted" name="encrypted">
-    <button type="button" id="encryptBtn">Encrypt</button>
-    <button type="button" id="decryptBtn">Decrypt</button>
-  </form>
+    <div class="loader" id="encryptLoader"></div>
+    <div class="loader" id="decryptLoader"></div>
+    <h2>Output:</h2>
+    <div class="output-container" id="outputText"></div>
 
+    <h1>RSA Key Generator</h1>
+    <div class="rsa-container">
+      <label for="keyLength">Key Length</label>
+      <select id="keyLength" class="key-length">
+        <option value="1024">1024</option>
+        <option value="2048">2048</option>
+        <option value="4096">4096</option>
+      </select>
+      <button type="button" id="generateKeyPairBtn">Generate key pair</button>
+      <div class="loader" id="rsaLoader"></div>
+      <div class="key-pair-container">
+        <label for="privateKey">Private key</label>
+        <textarea id="privateKey" readonly></textarea>
+        <label for="publicKey">Public key</label>
+        <textarea id="publicKey" readonly></textarea>
+      </div>
+    </div>
+  </div>
 
-  <h2>Output:</h2>
-  <div class="loader" id="loader"></div>
-  <p id="outputText"></p>
-
-  <script>
-    const loader = document.getElementById('loader');
-    const outputText = document.getElementById('outputText');
-
-    function showLoader() {
-      loader.style.display = 'block';
-      outputText.style.display = 'none';
-    }
-
-    function hideLoader() {
-      loader.style.display = 'none';
-    }
-
-    function showOutput(text) {
-      outputText.style.display = 'block';
-      outputText.innerText = text;
-    }
-
-    document.getElementById('encryptBtn').addEventListener('click', function() {
-      const text = document.getElementById('text').value;
-      showLoader();
-
-      fetch('/encrypt', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: `text=${text}`
-      })
-      .then(response => response.json())
-      .then(data => {
-        hideLoader();
-        showOutput(`Encrypted: ${data.encryptedText}`);
-      })
-      .catch(error => {
-        hideLoader();
-        console.error('Error:', error);
-      });
-    });
-
-    document.getElementById('decryptBtn').addEventListener('click', function() {
-      const encryptedText = document.getElementById('encrypted').value;
-      showLoader();
-
-      fetch('/decrypt', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: `encrypted=${encryptedText}`
-      })
-      .then(response => response.json())
-      .then(data => {
-        hideLoader();
-        showOutput(`Decrypted: ${data.decryptedText}`);
-      })
-      .catch(error => {
-        hideLoader();
-        console.error('Error:', error);
-      });
-    });
-  </script>
+  <script src="js/script.js"></script>
 </body>
 </html>
